@@ -1,5 +1,11 @@
 # foobarbaz
-foobarbaz - a property-based testing library in C
+foobarbaz is my attempt to create a unit testing library for C that is simple,
+type-agnostic[^1], and readable.
+its pseudo-syntax is borrowed heavily from [mocha](https://mochajs.org/), and it
+achieves it through many macros from [chax](https://github.com/Oderjunkie/chax).
+
+[^1]: it is not *completely* type-agnostic, because if a type has an "invalid" state
+(ex. a tagged union) then the input may be invalid.
 ## usage
 ```c
 #include "foobarbaz.h"
