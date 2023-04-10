@@ -23,6 +23,9 @@ achieves it through many macros from [chax](https://github.com/Oderjunkie/chax).
 // whole numbers
 #define SLOW 10ms
 
+// requires POSIX. if defined, will catch segmentation faults.
+#define CATCH_SEGFAULTS
+
 #include "foobarbaz.h"
 
 // function under test
