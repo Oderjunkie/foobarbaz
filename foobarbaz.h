@@ -325,7 +325,7 @@ static int _advance(struct _pbt *data) {
   bufp += snprintf( \
     bufp, \
     (char *) buf + sizeof(buf) - bufp, \
-    "  " #x ": " \
+    "\n" #x ": " \
   ), bufp += snprintf( \
     bufp, \
     (char *) buf + sizeof(buf) - bufp, \
