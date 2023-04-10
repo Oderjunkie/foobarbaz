@@ -8,6 +8,21 @@ achieves it through many macros from [chax](https://github.com/Oderjunkie/chax).
 (ex. a tagged union) then the input may be invalid.
 ## usage
 ```c
+// change the text displayed next to a passing test
+#define CHECKMARK "[pass]"
+
+// note: by default, CROSSMARK is *not* defined, and
+// instead of displaying a fixed piece of text it will
+// display the ordinal corresponding to which test failed
+#define CROSSMARK "[fail]"
+
+// if the test takes longer than SLOW/2, then it will be
+// marked yellow. if it takes longer than SLOW, it will be red.
+// note that you can use minutes, seconds, and milliseconds as
+// units of measure (ex. #define SLOW 1s500ms) but they must be
+// whole numbers
+#define SLOW 10ms
+
 #include "foobarbaz.h"
 
 // function under test
