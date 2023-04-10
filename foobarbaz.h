@@ -6,6 +6,14 @@
 #include <limits.h>
 #include <stdio.h>
 #include <errno.h>
+#ifdef CATCH_SEGFAULTS
+  #include <signal.h>
+  #include <unistd.h>
+  #include <setjmp.h>
+  #define _if_catching_segfaults(...) __VA_ARGS__
+#else
+  #define _if_catching_segfaults(...)
+#endif
 
 #define _with(...) \
   for (int _w = 1; _w; _w = 0) \
@@ -223,8 +231,37 @@
 #define _mapreduce1_62(mapper, reducer, a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20, a21, a22, a23, a24, a25, a26, a27, a28, a29, a30, a31, a32, a33, a34, a35, a36, a37, a38, a39, a40, a41, a42, a43, a44, a45, a46, a47, a48, a49, a50, a51, a52, a53, a54, a55, a56, a57, a58, a59, a60, a61) reducer(mapper(a0), reducer(mapper(a1), reducer(mapper(a2), reducer(mapper(a3), reducer(mapper(a4), reducer(mapper(a5), reducer(mapper(a6), reducer(mapper(a7), reducer(mapper(a8), reducer(mapper(a9), reducer(mapper(a10), reducer(mapper(a11), reducer(mapper(a12), reducer(mapper(a13), reducer(mapper(a14), reducer(mapper(a15), reducer(mapper(a16), reducer(mapper(a17), reducer(mapper(a18), reducer(mapper(a19), reducer(mapper(a20), reducer(mapper(a21), reducer(mapper(a22), reducer(mapper(a23), reducer(mapper(a24), reducer(mapper(a25), reducer(mapper(a26), reducer(mapper(a27), reducer(mapper(a28), reducer(mapper(a29), reducer(mapper(a30), reducer(mapper(a31), reducer(mapper(a32), reducer(mapper(a33), reducer(mapper(a34), reducer(mapper(a35), reducer(mapper(a36), reducer(mapper(a37), reducer(mapper(a38), reducer(mapper(a39), reducer(mapper(a40), reducer(mapper(a41), reducer(mapper(a42), reducer(mapper(a43), reducer(mapper(a44), reducer(mapper(a45), reducer(mapper(a46), reducer(mapper(a47), reducer(mapper(a48), reducer(mapper(a49), reducer(mapper(a50), reducer(mapper(a51), reducer(mapper(a52), reducer(mapper(a53), reducer(mapper(a54), reducer(mapper(a55), reducer(mapper(a56), reducer(mapper(a57), reducer(mapper(a58), reducer(mapper(a59), reducer(mapper(a60), mapper(a61))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
 #define _mapreduce1_63(mapper, reducer, a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20, a21, a22, a23, a24, a25, a26, a27, a28, a29, a30, a31, a32, a33, a34, a35, a36, a37, a38, a39, a40, a41, a42, a43, a44, a45, a46, a47, a48, a49, a50, a51, a52, a53, a54, a55, a56, a57, a58, a59, a60, a61, a62) reducer(mapper(a0), reducer(mapper(a1), reducer(mapper(a2), reducer(mapper(a3), reducer(mapper(a4), reducer(mapper(a5), reducer(mapper(a6), reducer(mapper(a7), reducer(mapper(a8), reducer(mapper(a9), reducer(mapper(a10), reducer(mapper(a11), reducer(mapper(a12), reducer(mapper(a13), reducer(mapper(a14), reducer(mapper(a15), reducer(mapper(a16), reducer(mapper(a17), reducer(mapper(a18), reducer(mapper(a19), reducer(mapper(a20), reducer(mapper(a21), reducer(mapper(a22), reducer(mapper(a23), reducer(mapper(a24), reducer(mapper(a25), reducer(mapper(a26), reducer(mapper(a27), reducer(mapper(a28), reducer(mapper(a29), reducer(mapper(a30), reducer(mapper(a31), reducer(mapper(a32), reducer(mapper(a33), reducer(mapper(a34), reducer(mapper(a35), reducer(mapper(a36), reducer(mapper(a37), reducer(mapper(a38), reducer(mapper(a39), reducer(mapper(a40), reducer(mapper(a41), reducer(mapper(a42), reducer(mapper(a43), reducer(mapper(a44), reducer(mapper(a45), reducer(mapper(a46), reducer(mapper(a47), reducer(mapper(a48), reducer(mapper(a49), reducer(mapper(a50), reducer(mapper(a51), reducer(mapper(a52), reducer(mapper(a53), reducer(mapper(a54), reducer(mapper(a55), reducer(mapper(a56), reducer(mapper(a57), reducer(mapper(a58), reducer(mapper(a59), reducer(mapper(a60), reducer(mapper(a61), mapper(a62)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
 
-#define MAX_TRIES 10000
-#define MAX_REDUCTIONS 50000
+_if_catching_segfaults(
+  static sigjmp_buf _test_back;
+  
+  static inline void _segfault_catcher(int signo, siginfo_t *info, void *context) {
+    siglongjmp(_test_back, 1);
+  }
+  
+  static inline int _catch_segfaults(void) {
+    struct sigaction sa;
+
+    sa.sa_flags = SA_SIGINFO;
+    sa.sa_sigaction = _segfault_catcher;
+
+    if (sigemptyset(&sa.sa_mask))
+        exit(EXIT_FAILURE);
+    if (sigaddset(&sa.sa_mask, SIGSEGV))
+        exit(EXIT_FAILURE);
+    if (sigaction(SIGSEGV, &sa, NULL))
+        exit(EXIT_FAILURE);
+    
+    return 0;
+  }
+)
+
+#ifndef MAX_TRIES
+  #define MAX_TRIES 10000
+#endif
+  
+#ifndef MAX_REDUCTIONS
+  #define MAX_REDUCTIONS 50000
+#endif
 
 struct _pbt {
   int is_reducing, just_failed;
@@ -261,7 +298,11 @@ static struct _pbt _data;
   while (_advance(&_data)) \
   _with(_data.just_failed = 0) \
   _then(_mapreduce(_given1, _given2, __VA_ARGS__)) \
-  
+  _if_catching_segfaults( \
+    if (sigsetjmp(_test_back, 1) == 1 ? 1 : _catch_segfaults()) \
+      _data.just_failed = 1; \
+    else \
+  )
 
 static int _advance(struct _pbt *data) {
   if (data->is_reducing)
@@ -334,7 +375,16 @@ static int error_i = 0;
   _with(memset(&start, 0x00, sizeof(start)), memset(&end, 0x00, sizeof(end))) \
   _with(int _succeeded = 1) \
   _with(_draw_initial(_indentation_level, _current_description, &start)) \
-  _then(_draw_final(_succeeded, _current_description, sizeof(_current_description), &start, &end))
+  _then(_draw_final(_succeeded, _current_description, sizeof(_current_description), &start, &end)) \
+  _if_catching_segfaults( \
+    if (sigsetjmp(_test_back, 1) == 1 ? 1 : _catch_segfaults()) \
+      _assert( \
+        0, \
+        &_succeeded, \
+        __FILE__ ":" _stringize(__LINE__) ": Segmentation fault." \
+      ); \
+    else \
+  )
 
 static inline long _to_ms(const char *duration) {
   long result = 0;
