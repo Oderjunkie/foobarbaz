@@ -37,13 +37,13 @@ int main(void) {
 
   // use `describe` to categorize tests.
   // don't put quotes around the description
-  describe (add) {
+  describe ("add") {
     // use `it` to describe individual tests
-    it (can calculate 1+1) {
+    it ("can calculate 1+1") {
       assert(add(1, 1) == 2);
     }
     
-    it (has an identity element of 0) {
+    it ("has an identity element of 0") {
       // use `given` to test some property that holds true
       // no matter what the given value is. if you're familiar
       // with formal logic, think of `given` as `for_all`
@@ -53,7 +53,7 @@ int main(void) {
       }
     }
     
-    it (is commutative) {
+    it ("is commutative") {
       // note that you can't write `given (int x, int y)`
       // because of the limitations of C macros
       int x, y;
@@ -62,7 +62,7 @@ int main(void) {
       }
     }
     
-    it (is associative) {
+    it ("is associative") {
       int x, y, z;
       given (x, y, z) {
         assert(add(x, add(y, z)) == add(add(x, y), z));
