@@ -364,13 +364,13 @@ static long int _slow = 0;
 static const char *error_messages[256];
 static int error_i = 0;
 
-#define describe(...) \
-  _with(printf("%s" #__VA_ARGS__ "\n", INDENT(_indentation_level))) \
+#define describe(x) \
+  _with(printf("%s" x "\n", INDENT(_indentation_level))) \
     _with(const int x = _indentation_level, _indentation_level = x + 1)
 
-#define it(...) \
+#define it(x) \
   _with(_register_handler()) \
-  _with(const char _current_description[sizeof(#__VA_ARGS__)] = #__VA_ARGS__) \
+  _with(const char _current_description[sizeof(x)] = x) \
   _with(struct timespec start, end) \
   _with(memset(&start, 0x00, sizeof(start)), memset(&end, 0x00, sizeof(end))) \
   _with(int _succeeded = 1) \
