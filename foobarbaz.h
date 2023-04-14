@@ -271,6 +271,22 @@ struct _pbt {
 static const int _is_in_property = 0;
 static struct _pbt _data;
 
+/**
+ * @def given(...)
+ * @brief tests a specific property via fuzzing
+ * @param[out] ... the variables to fuzz
+ * @warning you must declare the variables seperately
+ * @code{c}
+ * describe("hash") {
+ *   it ("is deterministic") {
+ *    int x, y;
+ *    given (x, y) {
+ *      assert((hash(x) == hash(y)) == (x == y));
+ *    }
+ *  }
+ * }
+ * @endcode
+ */
 #define given(...) \
   _with(struct _pbt _data) \
   _with(memset(&_data, 0x00, sizeof(_data))) \
@@ -364,10 +380,39 @@ static long int _slow = 0;
 static const char *error_messages[256];
 static int error_i = 0;
 
+/**
+ * @def describe(desc)
+ * @brief categorizes a set of tests.
+ * @param[in] desc a brief description of the category
+ * @code{c}
+ * describe("add") {
+ *   it ("recognizes that 1 + 1 = 2") {
+ *     assert(add(1, 1) == 2);
+ *   }
+ *   it ("recognizes that 2 + 3 = 5") {
+ *     assert(add(2, 3) == 5);
+ *   }
+ * }
+ * @endcode
+ */
 #define describe(desc) \
   _with(printf("%s" desc "\n", INDENT(_indentation_level))) \
     _with(const int x = _indentation_level, _indentation_level = x + 1)
 
+/**
+ * @def it(desc)
+ * @brief begins a specific test
+ * @param[in] desc a brief description of the test
+ * @code{c}
+ * extern int meaning_of_life;
+ * 
+ * describe("extern") {
+ *   it ("knows the meaning of life") {
+ *     assert(meaning_of_life == 42);
+ *   }
+ * }
+ * @endcode
+ */
 #define it(desc) \
   _with(_register_handler()) \
   _with(const char _current_description[sizeof(desc)] = desc) \
@@ -501,6 +546,20 @@ static inline int _assert(int cond, int *_succeeded, const char *message) {
   return cond;
 }
 
+/**
+ * @def assert(cond)
+ * @brief asserts a specific condition
+ * @param[in] cond the condition to assert
+ * @code{c}
+ * extern int meaning_of_life;
+ * 
+ * describe("extern") {
+ *   it ("knows the meaning of life") {
+ *     assert(meaning_of_life == 42);
+ *   }
+ * }
+ * @endcode
+ */
 #define assert(cond) ( \
   _is_in_property \
   ? _assert_no_message(cond, &_data) \
