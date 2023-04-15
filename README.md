@@ -1,4 +1,11 @@
 # foobarbaz
+![Discord](https://img.shields.io/discord/1096149563871613099?style=for-the-badge&label=exploiting%20c)
+![Lines of code](https://img.shields.io/tokei/lines/github/Oderjunkie/foobarbaz?style=for-the-badge)
+![GitHub all releases](https://img.shields.io/github/downloads/Oderjunkie/foobarbaz/total?style=for-the-badge)
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/Oderjunkie/foobarbaz?style=for-the-badge)
+![C99+](https://img.shields.io/badge/C-%3E%3D99-blueviolet?style=for-the-badge)
+![GitHub](https://img.shields.io/github/license/Oderjunkie/foobarbaz?style=for-the-badge)
+
 foobarbaz is my attempt to create a unit testing library for C that is simple,
 type-agnostic[^1], and readable.
 its pseudo-syntax is borrowed heavily from [mocha](https://mochajs.org/), and it
