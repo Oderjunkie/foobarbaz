@@ -43,7 +43,6 @@ int add(int lhs, int rhs) {
 int main(void) {
 
   // use `describe` to categorize tests.
-  // don't put quotes around the description
   describe ("add") {
     // use `it` to describe individual tests
     it ("can calculate 1+1") {
