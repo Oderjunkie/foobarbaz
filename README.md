@@ -3,7 +3,7 @@
 ![Lines of code](https://img.shields.io/tokei/lines/github/Oderjunkie/foobarbaz?style=for-the-badge)
 ![GitHub all releases](https://img.shields.io/github/downloads/Oderjunkie/foobarbaz/total?style=for-the-badge)
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/Oderjunkie/foobarbaz?style=for-the-badge)
-![C99+](https://img.shields.io/badge/C-%3E%3D99-blueviolet?style=for-the-badge)
+![Minimum C version: 99](https://img.shields.io/badge/Minimum%20C%20Version-99-blueviolet?style=for-the-badge)
 ![GitHub](https://img.shields.io/github/license/Oderjunkie/foobarbaz?style=for-the-badge)
 
 foobarbaz is my attempt to create a unit testing library for C that is simple,
