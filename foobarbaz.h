@@ -268,7 +268,7 @@ struct _pbt {
   int number_of_tries, number_of_reductions;
 };
 
-static const int _is_in_property = 0;
+static int _is_in_property = 0;
 static struct _pbt _data;
 
 /**
@@ -309,7 +309,8 @@ static struct _pbt _data;
     ) \
   ) \
   _with(int _succeeded) \
-  _with(const int _is_in_property = 1) \
+  _with(_is_in_property = 1) \
+  _then(_is_in_property = 0) \
   _with(_mapreduce(_given5, _given2, __VA_ARGS__)) \
   while (_advance(&_data)) \
   _with(_data.just_failed = 0) \
@@ -374,7 +375,7 @@ static int _advance(struct _pbt *data) {
 #define ANSI_GREEN(s) "\x1b[32m" s "\x1b[0m"
 #define ANSI_YELLOW(s) "\x1b[33m" s "\x1b[0m"
 
-static const int _indentation_level = 0;
+static int _indentation_level = 0;
 static int _passing = 0, _failing = 0;
 static long int _slow = 0;
 static const char *error_messages[256];
@@ -395,9 +396,9 @@ static int error_i = 0;
  * }
  * @endcode
  */
-#define describe(desc) \
-  _with(printf("%s" desc "\n", INDENT(_indentation_level))) \
-    _with(const int x = _indentation_level, _indentation_level = x + 1)
+#define describe(...) \
+  _with(printf(INDENT(_indentation_level)), printf(__VA_ARGS__), printf("\n"), ++_indentation_level) \
+  _then(--_indentation_level) \
 
 /**
  * @def it(desc)
@@ -413,14 +414,17 @@ static int error_i = 0;
  * }
  * @endcode
  */
-#define it(desc) \
+#define it(...) \
   _with(_register_handler()) \
-  _with(const char _current_description[sizeof(desc)] = desc) \
+  _with(size_t _sz_current_description = snprintf((char *) 0, 0, __VA_ARGS__) + 1) \
+  _with(char *_current_description = malloc(_sz_current_description)) \
+  _with(sprintf(_current_description, __VA_ARGS__)) \
+  _then(free(_current_description)) \
   _with(struct timespec start, end) \
   _with(memset(&start, 0x00, sizeof(start)), memset(&end, 0x00, sizeof(end))) \
   _with(int _succeeded = 1) \
   _with(_draw_initial(_indentation_level, _current_description, &start)) \
-  _then(_draw_final(_succeeded, _current_description, sizeof(_current_description), &start, &end)) \
+  _then(_draw_final(_succeeded, _current_description, _sz_current_description, &start, &end)) \
   _if_catching_segfaults( \
     if (sigsetjmp(_test_back, 1) == 1 ? 1 : _catch_segfaults()) \
       _assert( \
@@ -627,4 +631,16 @@ static inline void _iterate(struct _pbt *data, char *ptr, char *last_ptr, int le
       return;
   }
 }
+
+#ifdef TEST
+  #define main(...) _main_1((__VA_ARGS__))
+  #define _bypass_main_ ~), (
+  #define _main_1(...) third(__VA_ARGS__, _main_2, _main_3, ~)(__VA_ARGS__)
+  #define _main_2(x, y) main y
+  #define _main_3(...) _main_4 __VA_ARGS__
+  #define _main_4(...) _fake_main(__VA_ARGS__)
+  #define third(x, y, z, ...) z
+  #define test(...) main(_bypass_main_ __VA_ARGS__)
+#endif
+
 #endif
