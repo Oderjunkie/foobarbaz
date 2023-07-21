@@ -40,7 +40,11 @@ int add(int lhs, int rhs) {
   return lhs + rhs;
 }
 
+#include <stdio.h>
+
 int main(void) {
+  printf("you forgot to compile this file with `-DTEST`\n");
+  printf("
 
   // use `describe` to categorize tests.
   describe ("add") {
